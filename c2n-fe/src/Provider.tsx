@@ -14,7 +14,7 @@ const getLibrary = (provider?: any): Web3Provider => {
 export default function RootProvider({
   children,
 }: {
-  children: JSX.Element;
+  children: JSX.Element[];
 }): JSX.Element {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
