@@ -1,9 +1,9 @@
 import React from "react";
-import Svg from "../Svg";
+import Svg from "./Svg";
 
 const Icon: React.FC<any> = (props) => {
   return (
-    <Svg viewBox="0 0 40 40" {...props}>
+    <Svg viewBox="0 0 40 40" {...props} spin={props.spin ? 1 : 0}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"

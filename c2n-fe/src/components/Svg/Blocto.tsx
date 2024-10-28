@@ -1,5 +1,5 @@
 import React from "react";
-import Svg from "../Svg";
+import Svg from "./Svg";
 
 
 const Icon: React.FC<any> = (props) => {
