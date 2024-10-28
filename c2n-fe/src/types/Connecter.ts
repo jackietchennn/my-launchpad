@@ -4,7 +4,6 @@ export enum ConnectorNames {
     Injected = "injected",
     WalletConnect = "walletConnect",
     BSC = "bsc",
-    Blocto = "blocto",
 }
 
 export interface Config {
@@ -22,7 +21,6 @@ import TokenPocket from "@/components/Svg/TokenPocket";
 import BinanceChain from "@/components/Svg/BinanceChain";
 import SafePal from "@/components/Svg/SafePal";
 import Coin98 from "@/components/Svg/Coin98";
-import Blocto from "@/components/Svg/Blocto";
 
 const Connectors: Config[] = [
     {
@@ -73,13 +71,6 @@ const Connectors: Config[] = [
         connectorId: ConnectorNames.Injected,
         priority: 999,
     },
-    {
-        title: "Blocto",
-        icon: Blocto,
-        connectorId: ConnectorNames.Blocto,
-        priority: 999,
-    },
-
 ]
 
 export default Connectors;

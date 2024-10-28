@@ -4211,7 +4211,7 @@ export const chainConfigurations = [
 /**
  * 获取指定区块链配置信息
  * @param chainId 区块链ID
- * @returns IChain.Configuration
+ * @returns ChainConfiguration
  */
 export const getChainConfiguration = (chainId: number = CHAIN_ID) => {
   return chainConfigurations.find((chainConfiguration) => {

@@ -6,7 +6,7 @@ interface WalletButtonProps {
 }
 
 export default function WalletButton(props: WalletButtonProps) {
-    const { walletAddress, showWallet } = useWallet();
+    const { activatedAccountAddress, showWallet } = useWallet();
 
     return (
         <div
@@ -17,7 +17,7 @@ export default function WalletButton(props: WalletButtonProps) {
             onClick={() => showWallet(true)}
         >
             <IconWalletButton></IconWalletButton>
-            {walletAddress?.replace(/^(.{6}).+(.{4})$/, "$1...$2") ?? "Connect Wallet"}
+            {activatedAccountAddress?.replace(/^(.{6}).+(.{4})$/, "$1...$2") ?? "Connect Wallet"}
         </div>
     );
 }

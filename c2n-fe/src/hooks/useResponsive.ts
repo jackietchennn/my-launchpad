@@ -10,7 +10,6 @@ export const useResponsiveInit = () => {
   const dispatch = useAppDispatch();
 
   const handleResize = () => {
-    console.log('** window.innerWidth >= 769 **', window.innerWidth >= 769);
     dispatch(
       setMediaQuery(
         window.innerWidth >= 769

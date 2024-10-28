@@ -6,7 +6,7 @@ import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect, Wall
 import { NoBscProviderError } from "@binance-chain/bsc-connector";
 
 import { connectorTypeMap, setupFallbackChain } from "@/utils";
-import { ConnectorEnum } from "@/types/connector";
+import { ConnectorNames } from "@/types/Connecter";
 
 export const useAuth = () => {
   /** get web3 information from `useWeb3React` hook */
@@ -25,7 +25,7 @@ export const useAuth = () => {
   } = useWeb3React();
 
   // activate wallet by connector
-  const login = useCallback((connectorId: ConnectorEnum) => {
+  const login = useCallback((connectorId: ConnectorNames) => {
     const connector = connectorTypeMap[connectorId];
 
     if (!connector) {

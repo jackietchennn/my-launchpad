@@ -2,9 +2,10 @@
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { BscConnector } from "@binance-chain/bsc-connector";
-import { ConnectorEnum } from "@/types/connector";
+
+import { ConnectorNames } from "@/types/Connecter";
 import { CHAIN_ID } from "@/config/constants/network";
-import { getChainRPCRandom } from "@/utils";
+import { getChainRPCRandom } from "@/utils/chain-configurations";
 
 /** Injected Connector */
 const injectedConnector = new InjectedConnector({});
@@ -19,7 +20,7 @@ const walletConnectConnector = new WalletConnectConnector({
 const bscConnector = new BscConnector({});
 
 export const connectorTypeMap = {
-  [ConnectorEnum.Injected]: injectedConnector,
-  [ConnectorEnum.Walletconnect]: walletConnectConnector,
-  [ConnectorEnum.BSC]: bscConnector,
+  [ConnectorNames.Injected]: injectedConnector,
+  [ConnectorNames.WalletConnect]: walletConnectConnector,
+  [ConnectorNames.BSC]: bscConnector,
 };

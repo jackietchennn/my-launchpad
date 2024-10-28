@@ -1,3 +1,5 @@
+// import { providers } from "ethers";
+
 interface NativeCurrency {
   /**
    * 加密货币名称
@@ -62,4 +64,6 @@ declare namespace IEthereum {
 
 declare interface Window {
   ethereum: IEthereum.Ethereum;
+  // ethereum: providers.Web3Provider;
+  MSStream: Record<string, any>;
 }

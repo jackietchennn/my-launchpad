@@ -1,4 +1,4 @@
-export interface Configuration {
+export interface ChainConfiguration {
   /**
    * 区块链名称
    */

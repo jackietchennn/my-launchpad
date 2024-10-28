@@ -1,13 +1,28 @@
 import { Col, Modal, Row } from "antd";
 
-import Connectors from "@/types/Connecter";
+import Connectors, { Config, ConnectorNames } from "@/types/Connecter";
 import { useWallet } from "@/hooks/useWallets";
 import { useAppDispatch } from "@/redux/store";
+import { useAuth } from "@/hooks/useAuth";
 
 const WalletModal = () => {
     const { walletModalVisible, showWallet } = useWallet();
+    const { login } = useAuth();
 
-    /** connect pannel */
+    const triggerConnectorClick = (connector: Config) => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // Since iOS does not support Trust Wallet we fall back to WalletConnect
+        if (connector.title === "Trust Wallet" && isIOS) {
+            login(ConnectorNames.WalletConnect);
+        } else {
+            login(connector.connectorId);
+        }
+
+        showWallet(false);
+    };
+
+    /** wallet pannel */
     const ConnectPannel = (
         <>
             <Row justify="start">
@@ -16,7 +31,12 @@ const WalletModal = () => {
             <Row justify="center" gutter={[16, 24]} className="max-h-[50vh] overflow-y-scroll">
                 {Connectors.map((connector, index) => {
                     return (
-                        <Col key={index} span={24} className="!flex w-full h-[70px] px-3 py-0 rounded-[18px] bg-[#f4f4f4] cursor-pointer leading-[70px] hover:bg-[#b4b4b4]">
+                        <Col
+                            key={index}
+                            span={24}
+                            className="!flex w-full h-[70px] px-3 py-0 rounded-[18px] bg-[#f4f4f4] cursor-pointer leading-[70px] hover:bg-[#b4b4b4]"
+                            onClick={() => triggerConnectorClick(connector)}
+                        >
                             <connector.icon className="w-[54px] h-[54px] rounded-full bg-[length:80%] bg-white bg-center align-middle"></connector.icon>
                             <span className="text-[18px] text-[#000] ml-3">{connector.title}</span>
                         </Col>

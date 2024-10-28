@@ -10,6 +10,7 @@ import RootProvider from "@/Provider";
 import { useResponsiveInit } from "@/hooks/useResponsive";
 import AppHeader from "@/containers/Header/Header";
 import "@/styles/globals.css";
+import { listenToWallet } from "@/hooks/useWallets";
 
 // 提供布局Wrapper组件
 // AppHeader
@@ -37,6 +38,8 @@ function Wrapper({ Component, pageProps }: AppProps) {
 
   // 响应式布局监听
   useResponsiveInit();
+  // 钱包信息变动监听
+  listenToWallet();
 
   return (
     <div className="main-wrapper desktop:w-full">
