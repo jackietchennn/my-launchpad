@@ -7,16 +7,15 @@ import { ConfigProvider, Layout } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import RootProvider from "@/Provider";
-import "@/styles/globals.css";
-import AppHeader from "@/containers/Header/Header";
 import { useResponsiveInit } from "@/hooks/useResponsive";
+import AppHeader from "@/containers/Header/Header";
+import "@/styles/globals.css";
 
 // 提供布局Wrapper组件
 // AppHeader
 // The pages router ...
 // AppFooter
 function Wrapper({ Component, pageProps }: AppProps) {
-  const { Content } = Layout;
   const mainRef = useRef<HTMLDivElement>(null);
   const RouteLoadingLayer = () => {
     const [routeLoading, setRouteLoading] = useState<boolean>(false);
@@ -40,13 +39,13 @@ function Wrapper({ Component, pageProps }: AppProps) {
   useResponsiveInit();
 
   return (
-    <div className="main-wrapper">
+    <div className="main-wrapper desktop:w-full">
       <RouteLoadingLayer></RouteLoadingLayer>
       <div ref={mainRef} className="main-body">
         <AppHeader></AppHeader>
-        <Content>
+        <Layout.Content>
           <Component {...pageProps} />
-        </Content>
+        </Layout.Content>
       </div>
     </div>
   );

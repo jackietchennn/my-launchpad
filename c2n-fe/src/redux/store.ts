@@ -3,11 +3,15 @@ import { configureStore } from "@reduxjs/toolkit";
 
 import globalReducer from "./modules/global";
 import mediaQueryReducer from "./modules/media-query";
+import walletReducer from './modules/wallet';
+import contractReducer from './modules/contract';
 
 const store = configureStore({
   reducer: {
     global: globalReducer,
     mediaQuery: mediaQueryReducer,
+    wallet: walletReducer,
+    contract: contractReducer,
   },
 });
 

@@ -1,9 +1,9 @@
+import React from "react";
 import { Provider } from "react-redux";
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 
 import store from "@/redux/store";
-import React from "react";
 
 const POLLING_INTERVAL = 12000;
 const getLibrary = (provider?: any): Web3Provider => {

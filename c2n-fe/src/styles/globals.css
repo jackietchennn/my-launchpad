@@ -19,6 +19,12 @@
   }
 }
 
+@media (min-width: 769px) {
+  html, header, body {
+    min-width: 1220px;
+  }
+}
+
 @media (max-width: 769px) {
   :root {
     /* 头部高度 */
