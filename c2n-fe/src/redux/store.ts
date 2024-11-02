@@ -7,6 +7,23 @@ import walletReducer from './modules/wallet';
 import contractReducer from './modules/contract';
 
 const store = configureStore({
+  middleware: (getDefaultMiddleware) => {
+    return getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          "contractState/setSigner",
+          "contractState/setContract",
+        ],
+        ignoredPaths: [
+          "contract.signer",
+          "contract.depositTokenContract",
+          "contract.breContract",
+          "contract.stakingContract",
+          "contract.saleContract",
+        ]
+      }
+    })
+  },
   reducer: {
     global: globalReducer,
     mediaQuery: mediaQueryReducer,
