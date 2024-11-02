@@ -74,3 +74,6 @@ const Connectors: Config[] = [
 ]
 
 export default Connectors;
+export const connectorLocalStorageKey = "connectorIdv2";
+export const walletLocalStorageKey = "wallet";
+export const autoConnectLocalStorageKey = 'autoConnect'

@@ -8,9 +8,9 @@ import { LoadingOutlined } from "@ant-design/icons";
 
 import RootProvider from "@/Provider";
 import { useResponsiveInit } from "@/hooks/useResponsive";
+import { useListenToWallet } from "@/hooks/useWallets";
 import AppHeader from "@/containers/Header/Header";
 import "@/styles/globals.css";
-import { listenToWallet } from "@/hooks/useWallets";
 
 // 提供布局Wrapper组件
 // AppHeader
@@ -39,7 +39,7 @@ function Wrapper({ Component, pageProps }: AppProps) {
   // 响应式布局监听
   useResponsiveInit();
   // 钱包信息变动监听
-  listenToWallet();
+  useListenToWallet();
 
   return (
     <div className="main-wrapper desktop:w-full">

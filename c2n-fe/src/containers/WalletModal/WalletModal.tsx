@@ -1,6 +1,6 @@
 import { Col, Modal, Row } from "antd";
 
-import Connectors, { Config, ConnectorNames } from "@/types/Connecter";
+import Connectors, { Config, ConnectorNames, walletLocalStorageKey, connectorLocalStorageKey } from "@/types/Connecter";
 import { useWallet } from "@/hooks/useWallets";
 import { useAppDispatch } from "@/redux/store";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,8 @@ const WalletModal = () => {
             login(connector.connectorId);
         }
 
+        localStorage.setItem(walletLocalStorageKey, connector.title)
+        localStorage.setItem(connectorLocalStorageKey, connector.connectorId)
         showWallet(false);
     };
 

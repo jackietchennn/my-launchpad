@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { message } from "antd";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
 import { NoEthereumProviderError, UserRejectedRequestError as UserRejectedRequestErrorInjected } from "@web3-react/injected-connector";
@@ -6,7 +6,7 @@ import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect, Wall
 import { NoBscProviderError } from "@binance-chain/bsc-connector";
 
 import { connectorTypeMap, setupFallbackChain } from "@/utils";
-import { ConnectorNames } from "@/types/Connecter";
+import { autoConnectLocalStorageKey, connectorLocalStorageKey, ConnectorNames } from "@/types/Connecter";
 
 export const useAuth = () => {
   /** get web3 information from `useWeb3React` hook */
@@ -51,13 +51,26 @@ export const useAuth = () => {
         // other
         message.error(error.message);
       }
+    }).then(() => {
+      localStorage.setItem(autoConnectLocalStorageKey, '1');
     });
-  }, [message, activate]);
+  }, [activate]);
 
   // deactivate wallet by removing connector's event
   const logout = useCallback(() => {
     deactivate();
   }, [deactivate]);
+
+  // try to get wallet information when mounted
+  useEffect(() => {
+    const autoConnect = localStorage.getItem(autoConnectLocalStorageKey)
+    const connectorId = localStorage.getItem(connectorLocalStorageKey) as ConnectorNames
+
+    if (autoConnect && connectorId) {
+      localStorage.removeItem(autoConnect)
+      login(connectorId)
+    }
+  }, [])
 
   return {
     chainId,
