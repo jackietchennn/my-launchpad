@@ -4,7 +4,9 @@ import type { DocumentContext } from "next/document";
 
 const MyDocument = () => (
   <Html lang="en">
-    <Head />
+    <Head>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+    </Head>
     <body>
       <Main />
       <NextScript />
