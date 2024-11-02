@@ -4,7 +4,7 @@ import Svg from "./Svg";
 
 const Icon: React.FC<any> = (props) => {
   return (
-    <Svg viewBox="0 0 40 40" {...props} spin={props.spin ? 1 : 0}>
+    <Svg viewBox="0 0 40 40" {...props} $spin={props.$spin ? 1 : 0}>
       <path d="M36.0112 3.33337L22.1207 13.6277L24.7012 7.56091L36.0112 3.33337Z" fill="#E17726" />
       <path d="M4.00261 3.33337L17.7558 13.7238L15.2989 7.56091L4.00261 3.33337Z" fill="#E27625" />
       <path d="M31.0149 27.2023L27.3227 32.8573L35.2287 35.0397L37.4797 27.3258L31.0149 27.2023Z" fill="#E27625" />

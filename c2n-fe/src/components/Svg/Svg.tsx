@@ -5,7 +5,7 @@ interface SvgStyleProps {
   color?: string;
   width?: string;
   xmlns?: string;
-  spin?: number;
+  $spin?: number;
 }
 
 const rotate = keyframes`
@@ -26,8 +26,8 @@ const Svg = styled.svg<SvgStyleProps>`
     flex-shrink: 0;
     ${space}
 
-    ${({ spin }) => {
-        return spin && spinStyle;
+    ${({ $spin }) => {
+        return $spin && spinStyle;
     }}
 `;
 
@@ -35,7 +35,7 @@ Svg.defaultProps = {
     color: "text",
     width: "20px",
     xmlns: "http://www.w3.org/2000/svg",
-    spin: 0
+    $spin: 0
 };
 
 export default Svg;
