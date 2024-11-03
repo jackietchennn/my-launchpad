@@ -50,6 +50,10 @@ declare namespace IEthereum {
      * add new chain to metamask
      */
     addEthereumChain = "wallet_addEthereumChain",
+    /**
+     * switch chain
+     */
+    switchEthereumChain = 'wallet_switchEthereumChain',
   }
 
   interface RequestParameter<T> {

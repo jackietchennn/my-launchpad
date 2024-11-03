@@ -1,9 +1,8 @@
 import { useWallet } from "@/hooks/useWallets";
 import { IconWalletButton } from "../Icons";
+import { ComponentBaseProps } from "@/types/i-base";
 
-interface WalletButtonProps {
-    className?: string;
-}
+interface WalletButtonProps extends ComponentBaseProps {}
 
 export default function WalletButton(props: WalletButtonProps) {
     const { activatedAccountAddress, showWallet } = useWallet();

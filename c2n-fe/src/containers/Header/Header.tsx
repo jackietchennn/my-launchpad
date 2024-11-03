@@ -8,6 +8,7 @@ import LogoPNG from "@/assets/images/c2n_logo.png";
 import { useResponsive } from "@/hooks/useResponsive";
 import WalletModal from '@/containers/WalletModal/WalletModal'
 import WalletButton from "@/components/elements/WalletButton";
+import NetworkButton from "@/components/elements/NetworkButton";
 
 // menu
 const menus = [
@@ -44,7 +45,7 @@ export default function AppHeader() {
           );
         })}
         <WalletButton className={!isDesktopOrLaptop ? "ml-[14px]" : ""}></WalletButton>
-        {isDesktopOrLaptop ? <Button type="primary">Network Button</Button> : null}
+        {isDesktopOrLaptop ? <NetworkButton></NetworkButton> : null}
       </ul>
     );
   };

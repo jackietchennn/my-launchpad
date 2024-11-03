@@ -1,13 +1,14 @@
 import { useCallback, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 
-import { chainConfigurations, getChainConfiguration } from "@/utils";
+import { chainConfigurations, getChainConfiguration, to } from "@/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { setWalletModalVisible } from "@/redux/modules/wallet";
 import { setActivatedAccountAddress, setActivatedChainConfig, setContract, setSigner } from "@/redux/modules/contract";
 import { message } from "antd";
 import { Contract, providers } from "ethers";
 import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, tokenAbi } from "@/config";
+import { validChains } from "@/config/validChains";
 
 export const useListenToWallet = () => {
     const { chainId, account, connector } = useWeb3React();
@@ -45,7 +46,7 @@ export const useListenToWallet = () => {
             dispatch(setActivatedAccountAddress(account ?? undefined));
             account && message.success(`You have connected to account ${account}`);
         };
-        
+
         triggerAccountChange();
     }, [dispatch, account]);
 
@@ -92,15 +93,60 @@ export const useWallet = () => {
 
     const walletModalVisible = useAppSelector((state) => state.wallet.walletModalVisible);
     const activatedAccountAddress = useAppSelector((state) => state.contract.activatedAccountAddress);
+    const activatedChainConfig = useAppSelector((state) => state.contract.activatedChainConfig);
 
     const showWallet = (visible?: boolean) => {
         dispatch(setWalletModalVisible(visible ?? !walletModalVisible));
     };
 
+    const switchNetwork = useCallback(
+        async (chainId: number) => {
+            if (!activatedAccountAddress) {
+                console.warn("no wallet address", activatedAccountAddress);
+            }
+
+            const chain = chainConfigurations.find((chainConfig) => chainConfig.chainId === chainId) ?? validChains[0];
+            const param = {
+                chainId: `0x${chain.chainId.toString(16)}`,
+                chainName: chain.name,
+                nativeCurrency: { ...chain.nativeCurrency },
+                rpcUrls: chain.rpc,
+                blockExplorerUrls: [`${chain.infoURL}/`],
+            };
+
+            const [switchErr] = await to(
+                window.ethereum.request({
+                    // method: IEthereum.RequestMethod.switchEthereumChain,
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: param.chainId }],
+                })
+            );
+
+            // 区块链不存在，尝试新增
+            if ((switchErr as any)?.code === 4902) {
+                const [addErr] = await to(
+                    window.ethereum.request({
+                        // method: IEthereum.RequestMethod.addEthereumChain,
+                        method: 'wallet_addEthereumChain',
+                        params: [param],
+                    })
+                );
+
+                if (addErr) {
+                    console.warn("addErr", addErr);
+                }
+            }
+        },
+        [activatedAccountAddress]
+    );
+
     return {
         walletModalVisible,
         activatedAccountAddress,
+        activatedChainConfig,
+        validChains,
 
         showWallet,
+        switchNetwork,
     };
 };
