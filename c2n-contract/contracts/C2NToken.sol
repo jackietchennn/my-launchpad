@@ -38,11 +38,18 @@ contract C2NToken is Context, IERC20 {
 
     string private _name;
     string private _symbol;
-    string private _decimals;
+    uint8 private _decimals;
 
     uint256 private _totalSupply;
     mapping (address => uint256) private _balances;
     mapping (address owner => mapping(address spender => uint256)) private _allowances;
+
+    constructor(string memory name_, string memory symbol_, uint8 decimals_, uint256 totalSupply_) {
+        _name = name_;
+        _symbol = symbol_;
+        _decimals = decimals_;
+        _mint(_msgSender(), totalSupply_);
+    }
 
     function name() public view virtual returns (string memory) {
         return _name;
@@ -52,7 +59,7 @@ contract C2NToken is Context, IERC20 {
         return _symbol;
     }
 
-    function decimals() public view virtual returns (string memory) {
+    function decimals() public view virtual returns (uint8) {
         return _decimals;
     }
 
@@ -131,7 +138,7 @@ contract C2NToken is Context, IERC20 {
     }
 
     function _mint(address account, uint256 value) internal {
-        require(account != address(0), "ERC20: Invalid receiver");
+        require(account != address(0), "ERC20: mint to the zero address");
         _update(address(0), account, value);
     }
 

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract Airdrop {
+contract C2NAirdrop {
     using ECDSA for bytes32;
     using Math for *;
 
