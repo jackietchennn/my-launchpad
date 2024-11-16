@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.26;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -46,14 +46,14 @@ contract FarmingC2N is Ownable {
      * // pool operation
      * function add(IERC20 _lpToken, uint256 _allocationPoint, bool _withUpdate) public onlyOwner {}
      * function set(uint256 _pid, uint256 _allocationPoint, bool _withUpdate) public onlyOwner {}
-     * function poolLength() public views returns (uint256) {}
+     * function poolLength() public view returns (uint256) {}
      * function massUpdatePools() public {}
      * function updatePool(uint256 _pid) public {}
      * 
      * // query operation of balance or reward
-     * function deposited(uint _pid, address user) public view returns (uint256) {}
-     * function pending(uint256 _pid) views returns (uint256) {}
-     * function totalPending() views returns (uint256) {}
+     * function deposited(uint _pid, address user) external view returns (uint256) {}
+     * function pending(uint256 _pid) view returns (uint256) {}
+     * function totalPending() view returns (uint256) {}
      * 
      * // io operation of user amount
      * function deposit(uint256 _pid, uint256 _amount) public {}
@@ -77,7 +77,7 @@ contract FarmingC2N is Ownable {
         // allocation point for this pool
         uint256 allocationPoint;
         // total lpToken deposited
-        uint256 totalDepsits;
+        uint256 totalDeposits;
         // latest reward timestamp
         uint256 lastRewardTimestamp;
         // accumulated erc20s per share
@@ -89,7 +89,7 @@ contract FarmingC2N is Ownable {
     event EmergencyWithdraw(address indexed user, uint256 poolId, uint256 amount);
 
     // Address of the ERC20 token contract
-    IEC20 public erc20Token;
+    IERC20 public erc20Token;
     // Total rewards add to farm
     uint256 public totalRewards;
     // Total rewards paidout
@@ -101,59 +101,62 @@ contract FarmingC2N is Ownable {
     // farm start time
     uint256 public startTimestamp;
     // farm end time
-    uint256 public endTimeStamp;
+    uint256 public endTimestamp;
     // collection of pools
     PoolInfo[] public poolInfo;
     // mapping from poolId to userInfo
     mapping(uint256 pid => mapping(address => UserInfo)) public userInfo;
 
-    constructor(IERC20 _erc20Token, uint256 _rewardPerSecond, uint256 _startTimestamp) public {
+    constructor(IERC20 _erc20Token, uint256 _rewardPerSecond, uint256 _startTimestamp) 
+        Ownable(_msgSender()) 
+    {
         erc20Token = _erc20Token;
         rewardPerSecond = _rewardPerSecond;
         startTimestamp = _startTimestamp;
-        endTimeStamp = _startTimestamp;
+        endTimestamp = _startTimestamp;
     }
     function fund(uint256 _amount) public {
-        require(block.timestamp < endTimeStamp, "Farm: too late, the farm has closed.");
-        totalRewards = totalRewards.add(_amount);
-        endTimestamp += _amount.div(rewardPerSecond);
+        require(block.timestamp < endTimestamp, "Farm: too late, the farm has closed.");
+        totalRewards = totalRewards + _amount;
+        endTimestamp += _amount / rewardPerSecond;
         erc20Token.safeTransferFrom(msg.sender, address(this), _amount);
     }
-    function add(IEC20 _lpToken, uint256 _allocationPoint, bool _withUpdate) public onlyOwner {
+    function add(IERC20 _lpToken, uint256 _allocationPoint, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
 
-        totalAllocationPoint = totalAllocationPoint.add(_allocationPoint);
-        poolInfo.push({
+        totalAllocationPoint = totalAllocationPoint + _allocationPoint;
+        // 添加新成员时，需要使用 `PoolInfo` struct 包裹新成员
+        poolInfo.push(PoolInfo({
             lpToken: _lpToken,
             allocationPoint: _allocationPoint,
             lastRewardTimestamp: block.timestamp > startTimestamp ? block.timestamp : startTimestamp,
             totalDeposits: 0,
-            accumulatedERC20PerShare: 0,
-        });
+            accumulatedERC20PerShare: 0
+        }));
     }
-    function set(uint256 _pid, uint256 _allocatinPoint, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint256 _allocationPoint, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
 
-        totalAllocatinPoint = totalAllocatinPoint.sub(poolInfo[_pid].allocationPoint).add(_allocatinPoint);
-        poolInfo[_pid].allocationPoint = _allocatinPoint;
+        totalAllocationPoint = totalAllocationPoint - poolInfo[_pid].allocationPoint + _allocationPoint;
+        poolInfo[_pid].allocationPoint = _allocationPoint;
     }
-    function poolLength() public views returns (uint256) {
+    function poolLength() public view returns (uint256) {
         return poolInfo.length;
     }
-    function massUpdatePools() public views {
-        uint256 poolLength = poolInfo.length;
+    function massUpdatePools() public {
+        uint256 _poolLength = poolInfo.length;
 
-        for (uint256 pid = 0; pid < poolLength; pid++) {
+        for (uint256 pid = 0; pid < _poolLength; pid++) {
             updatePool(pid);
         }
     }
     function updatePool(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
-        uint256 lastTimestamp = block.timestamp < endTimeStamp ? block.timestamp : endTimeStamp;
+        uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
 
         if (lastTimestamp <= pool.lastRewardTimestamp) {
             return;
@@ -161,44 +164,44 @@ contract FarmingC2N is Ownable {
 
         uint256 lpSupply = pool.totalDeposits;
 
-        if (lpSupply === 0) {
+        if (lpSupply == 0) {
             pool.lastRewardTimestamp = lastTimestamp;
             return;
         }
 
-        uint256 nrOfSecond = lastTimestamp.sub(pool.lastRewardTimestamp);
-        uint256 erc20Rewards = nrOfSecond.mul(rewardPerSecond).mul(pool.allocationPoint).div(totalAllocationPoint);
+        uint256 nrOfSecond = lastTimestamp - pool.lastRewardTimestamp;
+        uint256 erc20Rewards = nrOfSecond * rewardPerSecond * pool.allocationPoint / totalAllocationPoint;
 
-        pool.accumulatedERC20PerShare = pool.accumulatedERC20PerShare.add(erc20Rewards.mul(1e36).div(lpSupply));
+        pool.accumulatedERC20PerShare = pool.accumulatedERC20PerShare + (erc20Rewards * 1e36 / lpSupply);
         pool.lastRewardTimestamp = lastTimestamp;
     }
-    function deposited(uint256 _pid) public views returns (uint256) {
-        return poolInfo[_pid][msg.sender].amount;
+    function deposited(uint256 _pid, address _user) external view returns (uint256) {
+        return userInfo[_pid][_user].amount;
     }
-    function pending(uint256 _pid) public views returns (uint256) {
+    function pending(uint256 _pid) public view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         uint256 accumulatedERC20PerShare = pool.accumulatedERC20PerShare;
         uint256 lpSupply = pool.totalDeposits;
 
         if (block.timestamp > pool.lastRewardTimestamp && lpSupply != 0) {
-            uint256 lastTimestamp = block.timestamp < endTimeStamp ? block.timestamp : endTimeStamp;
-            uint256 timestampToCompare = pool.lastRewardTimestamp < endTimeStamp ? pool.lastRewardTimestamp : endTimeStamp;
-            uint256 nrOfSecond = lastTimestamp.sub(timestampToCompare);
-            uint256 erc20Rewards = nrOfSecond.mul(rewardPerSecond).mul(pool.allocationPoint).div(totalAllocationPoint);
-            accumulatedErc20PerShare = accumulatedERC20PerShare.add(erc20Rewards.mul(1e36).div(lpSupply));
+            uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
+            uint256 timestampToCompare = pool.lastRewardTimestamp < endTimestamp ? pool.lastRewardTimestamp : endTimestamp;
+            uint256 nrOfSecond = lastTimestamp - timestampToCompare;
+            uint256 erc20Rewards = nrOfSecond * rewardPerSecond * pool.allocationPoint / totalAllocationPoint;
+            accumulatedERC20PerShare = accumulatedERC20PerShare + (erc20Rewards * 1e36 / lpSupply);
         }
 
-        return user.amount.mul(accumulatedERC20PerShare).div(1e36).sub(user.rewardDebt);
+        return (user.amount * accumulatedERC20PerShare / 1e36) - user.rewardDebt;
     }
-    function totalPending() public views returns (uint256) {
+    function totalPending() public view returns (uint256) {
         if (block.timestamp <= startTimestamp) {
             return 0;
         }
 
-        uint256 lastTimestamp = block.timestamp < endTimeStamp ? block.timestamp : endTimeStamp;
+        uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
 
-        return rewardPerSecond.mul(lastRewardTimestamp.sub(startTimestamp)).sub(paidOut);
+        return (rewardPerSecond * (lastTimestamp - startTimestamp)) - paidOut;
     }
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
@@ -207,14 +210,14 @@ contract FarmingC2N is Ownable {
         updatePool(_pid);
 
         if (user.amount > 0) {
-            uint256 pendingAmount = user.amount.mul(pool.accumulatedERC20PerShare).div(1e36).sub(user.rewardDebt);
+            uint256 pendingAmount = (user.amount * pool.accumulatedERC20PerShare / 1e36) - user.rewardDebt;
             erc20Transfer(msg.sender, pendingAmount);
         }
 
-        pool.totalDeposits = pool.totalDeposits.add(_amount);
+        pool.totalDeposits = pool.totalDeposits + _amount;
         pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-        user.amount = user.amount.add(_amount);
-        user.rewardDebt = user.amount.mul(pool.accumulatedErc20PerShare).div(1e36);
+        user.amount = user.amount + _amount;
+        user.rewardDebt = user.amount * pool.accumulatedERC20PerShare / 1e36;
         emit Deposit(msg.sender, _pid, _amount);
     }
     function withdraw(uint256 _pid, uint256 _amount) public {
@@ -224,27 +227,27 @@ contract FarmingC2N is Ownable {
         require(user.amount >= _amount, "Farm: you can't withdraw more than deposit");
         updatePool(_pid);
 
-        uint256 pendingAmount = user.amount(pool.accumulatedErc20PerShare).div(1e36).sub(user.rewardDebt);
+        uint256 pendingAmount = (user.amount * pool.accumulatedERC20PerShare / 1e36) - user.rewardDebt;
         erc20Transfer(address(msg.sender), pendingAmount);
 
-        pool.totalDeposits = pool.totalDeposits.sub(_amount);
+        pool.totalDeposits = pool.totalDeposits - _amount;
         pool.lpToken.safeTransferFrom(address(this), msg.sender, pendingAmount);
-        user.amount = user.amount.sub(_amount);
-        user.rewardDebt = user.amount(pool.accumulatedErc20PerShare).div(1e36);
+        user.amount = user.amount - _amount;
+        user.rewardDebt = user.amount * pool.accumulatedERC20PerShare / 1e36;
 
         emit Withdraw(msg.sender, _pid, _amount);
     }
     function emergencyWithdraw(uint256 _pid) public {
-        PoolInfo storage pool = poolInfo[_pid]
-        UserInfo storage user = userInfo[_pid][msg.sender]
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
 
-        pool.lpToken.safeTransfer(address(mesg.sender), user.amount)
-        pool.totalDeposits = pool.totalDeposits.sub(user.amount)
-        user.amount = 0
-        user.rewardDebt = 0
+        pool.lpToken.safeTransfer(address(msg.sender), user.amount);
+        pool.totalDeposits = pool.totalDeposits - user.amount;
+        user.amount = 0;
+        user.rewardDebt = 0;
     }
     function erc20Transfer(address _to, uint256 _amount) internal {
-        erc20Token.safeTransfer(_to, _amount)
-        paidOut = paidOut.add(_amount);
+        erc20Token.safeTransfer(_to, _amount);
+        paidOut = paidOut + _amount;
     }
 }

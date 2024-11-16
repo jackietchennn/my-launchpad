@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.26;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -17,7 +17,7 @@ contract C2NToken is Context, IERC20 {
      * symbol()
      * decimals()
      * totalSupply()
-     * balanceof(account)
+     * balanceOf(account)
      * transfer(to, value)
      * allowance(owner, spender)
      * approve(spender, value)
@@ -32,8 +32,9 @@ contract C2NToken is Context, IERC20 {
      * _spendAllowance(owner, spender, value)
      */
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    // 当继承的父类合约中已定义事件，直接使用即可
+    // event Transfer(address indexed from, address indexed to, uint256 value);
+    // event Approval(address indexed owner, address indexed spender, uint256 value);
 
     string private _name;
     string private _symbol;
@@ -41,17 +42,17 @@ contract C2NToken is Context, IERC20 {
 
     uint256 private _totalSupply;
     mapping (address => uint256) private _balances;
-    mapping (address owner => address spender => uint256) private _allowances;
+    mapping (address owner => mapping(address spender => uint256)) private _allowances;
 
-    function name() public view virtual retruns (string memory) {
+    function name() public view virtual returns (string memory) {
         return _name;
     }
 
-    function symbol() public view virtual retruns (string memory) {
+    function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
-    function decimals() public view virtual retruns (string memory) {
+    function decimals() public view virtual returns (string memory) {
         return _decimals;
     }
 
@@ -59,7 +60,7 @@ contract C2NToken is Context, IERC20 {
         return _totalSupply;
     }
 
-    function balanceof(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
 
@@ -67,18 +68,18 @@ contract C2NToken is Context, IERC20 {
         return _allowances[owner][spender];
     }
 
-    function transfer(address recipient, uint256 value) public view virtual override returns (bool) {
-        _transfer(msgSender(), recipient, value);
+    function transfer(address recipient, uint256 value) public virtual override returns (bool) {
+        _transfer(_msgSender(), recipient, value);
         return true;
     }
 
-    function approve(address spender, uint256 value) public view virtual override returns (bool) {
-        _approve(msgSender(), spender, value);
+    function approve(address spender, uint256 value) public virtual override returns (bool) {
+        _approve(_msgSender(), spender, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) public view virtual override returns (bool) {
-        address spender = msgSender();
+    function transferFrom(address from, address to, uint256 value) public virtual override returns (bool) {
+        address spender = _msgSender();
         _spendAllowance(from, spender, value);
         _transfer(from, to, value);
         return true;
@@ -105,7 +106,7 @@ contract C2NToken is Context, IERC20 {
         }
     }
 
-    functino _update(address from, address to, uint256 value) internal virtual {
+    function _update(address from, address to, uint256 value) internal virtual {
         if (from == address(0)) {
             _totalSupply += value;
         } else {
@@ -139,7 +140,7 @@ contract C2NToken is Context, IERC20 {
         _update(account, address(0), value);
     }
 
-    function _spendAllowance(address onwer, address spender, uint256 value) interval virtual {
+    function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
         uint256 currentAllowance = _allowances[owner][spender];
 
         if (currentAllowance != type(uint256).max) {

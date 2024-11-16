@@ -1,6 +1,6 @@
-// SPDX-Liscense-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.26;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -13,28 +13,28 @@ contract Airdrop {
     IERC20 public airdropToken;
     uint256 public totalTokenWithdrawn;
 
-    mapping (address => bool) waClaimed;
+    mapping (address => bool) wasClaimed;
     uint256 public constant TOKENS_PER_CLAIM = 100 * 10 ** 18;
 
     event TokenAirdroped(address indexed beneficiary);
 
-    constructor(address _airdropToken) public {
+    constructor(address _airdropToken) {
         require(_airdropToken != address(0), "Airdrop: Invalid token address");
 
         airdropToken = IERC20(_airdropToken);
     }
 
-    function withdrawTokens(uint256 value) public {
+    function withdrawTokens() public {
         address beneficiary = msg.sender;
 
         require(beneficiary == tx.origin, "Airdrop: require that message sender is tx-origin");
-        require(!waClaimed[beneficiary], "Airdrop: Already claimed");
+        require(!wasClaimed[beneficiary], "Airdrop: Already claimed");
 
         wasClaimed[beneficiary] = true;
         bool success = airdropToken.transfer(beneficiary, TOKENS_PER_CLAIM);
         require(success, "Airdrop: airdrop failed");
 
-        totalTokenWithdrawn = totalTokenWithdrawn.add(TOKENS_PER_CLAIM);
-        emit TokenAirDroped(beneficiary);
+        totalTokenWithdrawn = totalTokenWithdrawn + TOKENS_PER_CLAIM;
+        emit TokenAirdroped(beneficiary);
     }
 }
