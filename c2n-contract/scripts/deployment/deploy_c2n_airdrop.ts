@@ -14,6 +14,8 @@ const airdropDeploy = async () => {
         ContractName.C2NAirdrop,
         airdropContractAddress
     );
+    console.log('---Airdrop deploy to: ', airdropContractAddress);
+    
 
     // 空投代币补充
     const tokenContract = await hre.ethers.getContractAt(ContractName.C2NToken, tokenAddress);
