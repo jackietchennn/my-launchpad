@@ -6,10 +6,8 @@ import { getSavedContractAddresses, saveContractAddress } from "../shared/utils"
 const farmDeploy = async () => {
     // reward per second，即 报酬/秒
     const rewardPerSecond = "1";
-    // 农场开启时间         1731838995
-    const startTimestamp = 
-        // 1720008927;
-        1731838995;
+    // 农场开启时间
+    const startTimestamp = Number.parseInt(((Date.now() / 1000) + 900).toFixed(0));
 
     // 部署农场
     const tokenContractAddress =
