@@ -9,3 +9,6 @@ export const IconAppLogo = AppLogo;
 
 import Down from "@/assets/icons/svg/down.svg";
 export const IconDown = Down;
+
+import C2NLogo from "@/assets/icons/svg/c2n.svg";
+export const IconC2N = C2NLogo;

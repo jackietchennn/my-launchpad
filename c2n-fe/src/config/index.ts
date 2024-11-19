@@ -20,3 +20,20 @@ export const tokenAbi = [
 
   // Events
 ]
+
+export const TOKEN_ADDRESS_MAP = {
+  11155111: "0x4E71E941878CE2afEB1039A0FE16f5eb557571C8", // 测试链sepolia
+  31337: "0x5FbDB2315678afecb367f032d93F642f64180aa3", // 本地链 填C2N-TOKEN的地址
+}
+
+export const tokenSymbols = [
+  { chainId: 11155111, symbol: 'C2N', address: TOKEN_ADDRESS_MAP[11155111] },
+  { chainId: 31337, symbol: 'C2N', address: TOKEN_ADDRESS_MAP[31337] },
+]
+
+export const tokenInfos = [
+  { chainId: 11155111, symbol: 'C2N', address: TOKEN_ADDRESS_MAP[11155111] },
+  { chainId: 31337, symbol: 'C2N', address: TOKEN_ADDRESS_MAP[31337] },
+]
+
+export const AIRDROP_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" // 本地连 空投Airdrop的地址
