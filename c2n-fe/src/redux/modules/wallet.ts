@@ -4,10 +4,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export interface WalletState {
     walletModalVisible: boolean;
+    isWalletInstalled: boolean;
 }
 
 const initialState: WalletState = {
     walletModalVisible: false,
+    isWalletInstalled: false,
 };
 
 const walletSlice = createSlice({
@@ -17,9 +19,12 @@ const walletSlice = createSlice({
         setWalletModalVisible: (state, action: PayloadAction<boolean>) => {
             state.walletModalVisible = action.payload;
         },
+        setIsWalletInstalled: (state, action: PayloadAction<boolean>) => {
+            state.isWalletInstalled = action.payload;
+        },
     },
 });
 
-export const { setWalletModalVisible } = walletSlice.actions;
+export const { setWalletModalVisible, setIsWalletInstalled } = walletSlice.actions;
 
 export default walletSlice.reducer;

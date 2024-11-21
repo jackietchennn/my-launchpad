@@ -1,23 +1,17 @@
-import { useMemo } from "react";
 import { Col, message, Row } from "antd";
-
-import { useResponsive } from "@/hooks/useResponsive";
-import { tokenInfos } from "@/config";
-import { IconC2N } from "@/components/Icons";
-import { useWallet } from "@/hooks/useWallets";
-import { CopyOutlined } from "@ant-design/icons";
 import { noop } from "antd/es/_util/warning";
-import { useAirdropContract } from "@/hooks/useAirdropContract";
+import { CopyOutlined } from "@ant-design/icons";
+
 import { to } from "@/utils";
+import { useResponsive } from "@/hooks/useResponsive";
+import { useWallet } from "@/hooks/useWallets";
+import { useAirdropContract } from "@/hooks/useAirdropContract";
+import { IconC2N } from "@/components/Icons";
 
 const HomeBanner = () => {
     const { isDesktopOrLaptop } = useResponsive();
-    const { activatedChainConfig, activatedAccountAddress } = useWallet();
+    const { activatedChainConfig, activatedAccountAddress, token, triggerTokenAdd } = useWallet();
     const { airdropContract } = useAirdropContract();
-
-    const token = useMemo(() => {
-        return tokenInfos.find((tokenItem) => tokenItem.chainId === activatedChainConfig?.chainId) ?? tokenInfos[0];
-    }, [activatedChainConfig]);
 
     const triggerTokenClaim = async () => {
         if (!airdropContract || !activatedAccountAddress) {
@@ -30,36 +24,7 @@ const HomeBanner = () => {
             message.error(error.reason || error?.data?.message || error?.message || "claim failed");
         }
     };
-    const triggerTokenAdd = async () => {
-        if (!activatedChainConfig) {
-            message.error("connect wallet and try again!");
-            return;
-        }
 
-        if (activatedChainConfig.chainId !== token.chainId) {
-            message.error("switch network and try again!");
-            return;
-        }
-
-        const [watchErr] = await to(
-            window.ethereum.request({
-                method: "wallet_watchAsset",
-                params: {
-                    type: "ERC20",
-                    options: {
-                        address: token.address,
-                        symbol: token.symbol,
-                        decimals: 18,
-                        image: '',
-                    }
-                },
-            })
-        );
-
-        if (watchErr) {
-            message.error(watchErr.message);
-        }
-    };
     const operations = [
         {
             btnText: `Claim ${token.symbol}`,
@@ -99,7 +64,7 @@ const HomeBanner = () => {
                         <div
                             className="box-border mt-[7px] min-w-0 appearance-none inline-block text-center text-black rounded-[30px] font-medium cursor-pointer text-[18px] w-full h-[56px] leading-[56px] hover:brightness-110 hover:shadow-[5px,5px,50px,10px,#d7ff1e11] desktop:w-[160px] desktop:m-0"
                             style={{ backgroundImage: "linear-gradient(179deg, #d7ff1e 0%, #ffb852 100%)" }}
-                            onClick={opt.btnClick}
+                            onClick={() => opt.btnClick(token.chainId, token.address, token.symbol)}
                         >
                             {opt.btnText}
                         </div>

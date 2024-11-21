@@ -59,7 +59,7 @@ export default function NetworkButton(props: NetworkButton) {
                     {/* name */}
                     <div className="inline-block text-ellipsis overflow-hidden whitespace-nowrap break-words text-left align-middle">{activatedValidChain?.name ?? "Switch Network"}</div>
                     {/* icon */}
-                    <IconDown className="absolute right-[0.5em] top-1/2 translate-y-[-30%] text-white"></IconDown>
+                    <IconDown className="absolute right-[7px] top-1/2 translate-y-[-30%] text-white"></IconDown>
                 </div>
             ) : (
                 <div />

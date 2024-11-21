@@ -71,7 +71,7 @@ export default function AppHeader() {
                 <Row justify="end" align="middle" className="w-full h-full">
                   <MenuOutlined className="!text-white text-[28.8px]" onClick={() => setShowSlider(!showSlider)}></MenuOutlined>
                 </Row>
-                <Layout.Sider collapsed={!showSlider} collapsedWidth={0} theme="light" className="!fixed right-0 indent-[1em] z-[100]" onClick={() => setShowSlider(!showSlider)}>
+                <Layout.Sider collapsed={!showSlider} collapsedWidth={0} theme="light" className="!fixed right-0 indent-[14px] z-[100]" onClick={() => setShowSlider(!showSlider)}>
                   <MenuRender></MenuRender>
                 </Layout.Sider>
                 <div className="fixed top-0 right-0 bottom-0 left-0" style={{ display: showSlider ? 'block' : 'none' }} onClick={() => setShowSlider(!showSlider)}></div>

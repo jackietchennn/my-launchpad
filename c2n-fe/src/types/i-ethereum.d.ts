@@ -63,6 +63,7 @@ declare namespace IEthereum {
 
   interface Ethereum {
     request: <T>(param: RequestParameter<T>) => Promise<Error | null>;
+    isMetaMask: boolean
   }
 }
 

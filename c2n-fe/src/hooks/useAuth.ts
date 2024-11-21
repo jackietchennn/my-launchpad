@@ -7,6 +7,10 @@ import { NoBscProviderError } from "@binance-chain/bsc-connector";
 
 import { connectorTypeMap, setupFallbackChain } from "@/utils";
 import { autoConnectLocalStorageKey, connectorLocalStorageKey, ConnectorNames } from "@/types/Connecter";
+import { useAppDispatch } from "@/redux/store";
+import { setIsWalletInstalled } from "@/redux/modules/wallet";
+
+export const checkMetaMask = () => !!window?.ethereum?.isMetaMask
 
 export const useAuth = () => {
   /** get web3 information from `useWeb3React` hook */
@@ -23,11 +27,22 @@ export const useAuth = () => {
     /** the metohd try to logout wallet connector */
     deactivate,
   } = useWeb3React();
+  const dispatch = useAppDispatch()
 
   // activate wallet by connector
   const login = useCallback((connectorId: ConnectorNames) => {
     const connector = connectorTypeMap[connectorId];
 
+    // check MetaMask existiing
+    if (!checkMetaMask()) {
+      dispatch(setIsWalletInstalled(false)); 
+      message.error('Please Install MetaMask!');
+      return false;
+    } else {
+      dispatch(setIsWalletInstalled(true));
+    }
+
+    // check Connector existing
     if (!connector) {
       message.error(`The connector config of ${connectorId} is wrong.`);
       return false;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useWeb3React } from "@web3-react/core";
 
 import { chainConfigurations, getChainConfiguration, to } from "@/utils";
@@ -7,7 +7,7 @@ import { setWalletModalVisible } from "@/redux/modules/wallet";
 import { setActivatedAccountAddress, setActivatedChainConfig, setContract, setSigner } from "@/redux/modules/contract";
 import { message } from "antd";
 import { Contract, providers } from "ethers";
-import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, tokenAbi } from "@/config";
+import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, tokenAbi, tokenInfos } from "@/config";
 import { validChains } from "@/config/validChains";
 
 export const useListenToWallet = () => {
@@ -92,6 +92,7 @@ export const useWallet = () => {
     const dispatch = useAppDispatch();
 
     const walletModalVisible = useAppSelector((state) => state.wallet.walletModalVisible);
+    const isWalletInstalled = useAppSelector(state => state.wallet.isWalletInstalled)
     const activatedAccountAddress = useAppSelector((state) => state.contract.activatedAccountAddress);
     const activatedChainConfig = useAppSelector((state) => state.contract.activatedChainConfig);
 
@@ -140,13 +141,52 @@ export const useWallet = () => {
         [activatedAccountAddress]
     );
 
+    // activated token information
+    const token = useMemo(() => {
+        return tokenInfos.find((tokenItem) => tokenItem.chainId === activatedChainConfig?.chainId) ?? tokenInfos[0];
+    }, [activatedChainConfig]);
+    // 
+    const triggerTokenAdd = useCallback(async (chainId: number, tokenAddress: string, tokenSymbol: string) => {
+        if (!activatedChainConfig) {
+            message.error("connect wallet and try again!");
+            return;
+        }
+
+        if (activatedChainConfig.chainId !== chainId) {
+            message.error("switch network and try again!");
+            return;
+        }
+
+        const [watchErr] = await to(
+            window.ethereum.request({
+                method: "wallet_watchAsset",
+                params: {
+                    type: "ERC20",
+                    options: {
+                        address: tokenAddress,
+                        symbol: tokenSymbol,
+                        decimals: 18,
+                        image: '',
+                    }
+                },
+            })
+        );
+
+        if (watchErr) {
+            message.error(watchErr.message);
+        }
+    }, [activatedChainConfig]);
+
     return {
         walletModalVisible,
+        isWalletInstalled,
         activatedAccountAddress,
         activatedChainConfig,
         validChains,
+        token,
 
         showWallet,
         switchNetwork,
+        triggerTokenAdd,
     };
 };

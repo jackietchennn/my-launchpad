@@ -3,35 +3,57 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
 
-  /* 头部高度 */
-  --header-height: 110px;
+    /* 头部高度 */
+    --header-height: 110px;
 }
 
 html {
-  /* font-size: 100px; */
+    /* font-size: 100px; */
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+    :root {
+        --foreground-rgb: 255, 255, 255;
+        --background-start-rgb: 0, 0, 0;
+        --background-end-rgb: 0, 0, 0;
+    }
 }
 
 @media (min-width: 769px) {
-  html, header, body {
-    min-width: 1220px;
-  }
+    html,
+    header,
+    body {
+        min-width: 1220px;
+    }
 }
 
 @media (max-width: 769px) {
-  :root {
-    /* 头部高度 */
-    --header-height: 65px;
-  }
+    :root {
+        /* 头部高度 */
+        --header-height: 65px;
+    }
+}
+
+.container {
+    position: relative;
+    z-index: 0;
+    background-image: linear-gradient(180deg, #052c12 0%, #000000 73%);
+    color: #dbdbdb;
+}
+
+.container h1,
+.container h2,
+.container h3,
+.container h4 {
+    font-family: LucidaGrande-Bold, Roboto;
+}
+
+.main-content {
+    margin: auto;
+    position: relative;
+    overflow: hidden;
 }
