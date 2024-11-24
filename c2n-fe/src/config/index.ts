@@ -1,6 +1,6 @@
 export const STAKED_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_STAKED_TOKEN_ADDRESS!;
-
 export const ENARED_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_EARNED_TOKEN_ADDRESS!;
+export const STAKING_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS!;
 
 export const tokenAbi = [
   // Read-Only Functions
@@ -37,3 +37,21 @@ export const tokenInfos = [
 ]
 
 export const AIRDROP_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" // 本地连 空投Airdrop的地址
+
+export const STAKING_POOL_ID = 0;
+
+// staking address
+export const stakingPoolAddress = [
+  {
+    chainId: 11155111,
+    stakingAddress: '',
+    depositTokenAddress: '',
+    earnedTokenAddress: '',
+  },
+  {
+    chainId: 31337,
+    stkaingAddress: '',
+    depositTokenAddress: '',
+    earnedTokenAddress: '',
+  }
+]

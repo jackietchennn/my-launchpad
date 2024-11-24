@@ -17,7 +17,7 @@ const store = configureStore({
         ignoredPaths: [
           "contract.signer",
           "contract.depositTokenContract",
-          "contract.breContract",
+          "contract.earnedContract",
           "contract.stakingContract",
           "contract.saleContract",
         ]

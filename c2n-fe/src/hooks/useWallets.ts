@@ -7,8 +7,11 @@ import { setWalletModalVisible } from "@/redux/modules/wallet";
 import { setActivatedAccountAddress, setActivatedChainConfig, setContract, setSigner } from "@/redux/modules/contract";
 import { message } from "antd";
 import { Contract, providers } from "ethers";
-import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, tokenAbi, tokenInfos } from "@/config";
+import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, STAKING_ADDRESS, tokenAbi, tokenInfos } from "@/config";
 import { validChains } from "@/config/validChains";
+import C2NTokenABI from '@/utils/abi/C2NToken.json'
+import FarmingABI from '@/utils/abi/C2NFarming.json'
+import type { C2NToken, C2NFarming } from "../../typechain-types";
 
 export const useListenToWallet = () => {
     const { chainId, account, connector } = useWeb3React();
@@ -22,7 +25,7 @@ export const useListenToWallet = () => {
         dispatch(
             setContract({
                 depositTokenContract: undefined,
-                breContract: undefined,
+                earnedContract: undefined,
                 stakingContract: undefined,
                 saleContract: undefined,
             })
@@ -78,10 +81,11 @@ export const useListenToWallet = () => {
                 return;
             }
 
-            const depositTokenContract = new Contract(STAKED_TOKEN_ADDRESS, tokenAbi, signer);
-            const breContract = new Contract(ENARED_TOKEN_ADDRESS, tokenAbi, signer);
+            const stakingContract = new Contract(STAKING_ADDRESS, FarmingABI.abi, signer) as unknown as C2NFarming;
+            const depositTokenContract = new Contract(STAKED_TOKEN_ADDRESS, C2NTokenABI.abi, signer) as unknown as C2NToken;
+            const earnedContract = new Contract(ENARED_TOKEN_ADDRESS, C2NTokenABI.abi, signer) as unknown as C2NToken;
 
-            dispatch(setContract({ depositTokenContract, breContract }));
+            dispatch(setContract({ stakingContract, depositTokenContract, earnedContract }));
         };
 
         triggerTokenContractChange();

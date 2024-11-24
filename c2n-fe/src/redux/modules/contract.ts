@@ -3,15 +3,16 @@ import type { ChainConfiguration } from "@/types/i-chain";
 
 import { Contract, providers } from "ethers";
 import { createSlice } from "@reduxjs/toolkit";
+import type { C2NFarming, C2NToken } from "../../../typechain-types";
 
 export interface ContractState {
     activatedChainConfig?: ChainConfiguration;
     activatedAccountAddress?: string;
     signer?: providers.JsonRpcSigner;
 
-    depositTokenContract?: Contract;
-    breContract?: Contract;
-    stakingContract?: Contract;
+    depositTokenContract?: C2NToken;
+    earnedContract?: C2NToken;
+    stakingContract?: C2NFarming;
     saleContract?: Contract;
 }
 
@@ -21,7 +22,7 @@ const initialState: ContractState = {
     signer: undefined,
 
     depositTokenContract: undefined,
-    breContract: undefined,
+    earnedContract: undefined,
     stakingContract: undefined,
     saleContract: undefined,
 };
@@ -40,7 +41,7 @@ const contractState = createSlice({
         setSigner: (state, action: PayloadAction<providers.JsonRpcSigner | undefined>) => {
             state.signer = action.payload;
         },
-        setContract: (state, action: PayloadAction<Pick<ContractState, 'depositTokenContract' | 'breContract' | 'stakingContract' | 'saleContract'>>) => {
+        setContract: (state, action: PayloadAction<Pick<ContractState, 'depositTokenContract' | 'earnedContract' | 'stakingContract' | 'saleContract'>>) => {
             Object.assign(state, action.payload)
         }
     },

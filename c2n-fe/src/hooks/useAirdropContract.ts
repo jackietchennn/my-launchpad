@@ -2,7 +2,8 @@ import { useAppSelector } from "@/redux/store"
 import { Contract } from "ethers";
 
 import { AIRDROP_CONTRACT } from "@/config";
-import AirdropAbi from '@/utils/abi/C2NAirdrop.json'
+import AirdropABI from '@/utils/abi/C2NAirdrop.json'
+import type { C2NAirdrop } from "../../typechain-types";
 
 export const useAirdropContract = () => {
     const signer = useAppSelector(state => state.contract.signer)
@@ -12,7 +13,7 @@ export const useAirdropContract = () => {
         console.log('---no signer ');
     }
 
-    const airdropContract = new Contract(AIRDROP_CONTRACT, AirdropAbi.abi, signer)
+    const airdropContract = new Contract(AIRDROP_CONTRACT, AirdropABI.abi, signer) as unknown as C2NAirdrop
 
     return { airdropContract }
 }
