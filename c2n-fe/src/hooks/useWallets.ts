@@ -4,7 +4,7 @@ import { useWeb3React } from "@web3-react/core";
 import { chainConfigurations, getChainConfiguration, to } from "@/utils";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
 import { setWalletModalVisible } from "@/redux/modules/wallet";
-import { setActivatedAccountAddress, setActivatedChainConfig, setContract, setSigner } from "@/redux/modules/contract";
+import { setActivatedAccountAddress, setActivatedChainConfig, setContract, setLoading, setSigner } from "@/redux/modules/contract";
 import { message } from "antd";
 import { Contract, providers } from "ethers";
 import { ENARED_TOKEN_ADDRESS, STAKED_TOKEN_ADDRESS, STAKING_ADDRESS, tokenAbi, tokenInfos } from "@/config";
@@ -99,6 +99,7 @@ export const useWallet = () => {
     const isWalletInstalled = useAppSelector(state => state.wallet.isWalletInstalled)
     const activatedAccountAddress = useAppSelector((state) => state.contract.activatedAccountAddress);
     const activatedChainConfig = useAppSelector((state) => state.contract.activatedChainConfig);
+    const loading = useAppSelector(state => state.contract.loading)
 
     const showWallet = (visible?: boolean) => {
         dispatch(setWalletModalVisible(visible ?? !walletModalVisible));
@@ -145,6 +146,10 @@ export const useWallet = () => {
         [activatedAccountAddress]
     );
 
+    const setWalletLoading = (loading: boolean) => {
+        dispatch(setLoading(loading))
+    }
+
     // activated token information
     const token = useMemo(() => {
         return tokenInfos.find((tokenItem) => tokenItem.chainId === activatedChainConfig?.chainId) ?? tokenInfos[0];
@@ -188,9 +193,11 @@ export const useWallet = () => {
         activatedChainConfig,
         validChains,
         token,
+        loading,
 
         showWallet,
         switchNetwork,
         triggerTokenAdd,
+        setWalletLoading,
     };
 };

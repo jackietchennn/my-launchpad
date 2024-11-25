@@ -1,4 +1,5 @@
-import { ChainConfiguration } from "@/types/i-chain"
+import type { ChainConfiguration } from "@/types/i-chain"
+import type { ContractTransaction, ContractReceipt } from "ethers"
 
 import { useMemo, useState } from "react"
 
@@ -8,13 +9,14 @@ import { useAppSelector } from "@/redux/store"
 import { to } from "@/utils"
 import { BigNumber } from "ethers"
 import { C2NFarming, C2NToken } from "../../typechain-types"
+import { parseEther, parseUnits } from "ethers/lib/utils"
+import { message } from "antd"
 
 const getSpecificTypeAddress = (addressType: 'stakingAddress' | 'depositTokenAddress' | 'earnedTokenAddress', activatedChain?: ChainConfiguration) => {
     return stakingPoolAddress.find(item => item.chainId === activatedChain?.chainId)?.[addressType] ?? ''
 }
 
 export const useStake = () => {
-    const signer = useAppSelector(state => state.contract.signer)
     const stakingContract = useAppSelector(state => state.contract.stakingContract)
     const depositTokenContract = useAppSelector(state => state.contract.depositTokenContract)
     const earnedTokenContract = useAppSelector(state => state.contract.earnedContract)
@@ -33,7 +35,7 @@ export const useStake = () => {
     // 质押池ID
     const [poolId, setPoolId] = useState<BigNumber>(BigNumber.from(STAKING_POOL_ID))
     // 当前用户余额
-    const [balance, setBalance] = useState<bigint>()
+    const [balance, setBalance] = useState<bigint>(BigInt(0))
     // 当前用户授权质押合约可消费的代币数量
     const [allowance, setAllowance] = useState<bigint>()
 
@@ -126,7 +128,6 @@ export const useStake = () => {
 
         setDepositAmout(deposited)
     }
-
     const syncContractInfo = () => {
         if (!activatedAccountAddress) return
 
@@ -137,9 +138,53 @@ export const useStake = () => {
         syncDepositContractDeposited(poolId, activatedAccountAddress, stakingContract)
     }
 
-    const approve = async (spender: string, amount: number) => {}
-    const deposit = async (poolId: BigNumber, amount: number) => {}
-    const withdraw = async (poolId: BigNumber) => {}
+    const approve = async (spender: string) => {
+        if (!depositTokenContract || !spender) return false
+
+        const [approveErr, transaction] = await to<ContractTransaction>(depositTokenContract.approve(spender, parseUnits('10000', 18)))
+
+        if (approveErr || !transaction) {
+            console.log('---approveErr ', approveErr, transaction);
+            return false
+        }
+
+        await transaction.wait()
+        syncDepositContractAllowance(activatedAccountAddress, spender, depositTokenContract)
+    }
+    const deposit = async (_poolId: BigNumber, _amount: string) => {
+        if (!stakingContract) return false
+
+        const [depositErr, transaction] = await to<ContractTransaction>(stakingContract.deposit(_poolId, parseEther(_amount)))
+        if (depositErr || !transaction) {
+            console.log('---depositErr ', depositErr, transaction);
+            return false
+        }
+
+        const [waitErr, contractReceipt] = await to<ContractReceipt>(transaction.wait())
+        if (waitErr || !contractReceipt) {
+            console.log('---deposit wait error ', waitErr, contractReceipt);
+            return false
+        }
+
+        return contractReceipt
+    }
+    const withdraw = async (_poolId: BigNumber, _amount: string) => {
+        if (!stakingContract) return false
+
+        const [withdrawErr, transaction] = await to<ContractTransaction>(stakingContract.withdraw(_poolId, parseEther(_amount)))
+        if (withdrawErr || !transaction) {
+            console.log('---withdrawErr ', withdrawErr, transaction);
+            return false
+        }
+
+        const [waitErr, contractReceipt] = await to<ContractReceipt>(transaction.wait())
+        if (waitErr || !contractReceipt) {
+            console.log('---withdraw wait error ', waitErr, contractReceipt);
+            return false
+        }
+
+        return contractReceipt
+    }
 
     return {
         poolId,

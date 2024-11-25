@@ -11,7 +11,7 @@ export interface BasicButtonProps extends ComponentBaseProps {
     onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-const BasicButton = (props: BasicButtonProps) => {
+export default function BasicButton(props: BasicButtonProps) {
     return (
         <button
             className={mergeClassName([
@@ -34,5 +34,3 @@ const BasicButton = (props: BasicButtonProps) => {
         </button>
     );
 };
-
-export default BasicButton;

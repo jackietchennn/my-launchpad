@@ -1,25 +1,23 @@
-type ToResponse<D = any> = [err: Error | null, data: D | undefined];
+import type { AxiosError } from 'axios'
 
 /**
- * capture error
- * @param promise client promise
- * @param errorExt client error
- * @returns Promise<ToResponse<T>>
+ * async/await 容错处理
+ * @param {Promise} promise 异步函数
+ * @param {Error} errorExt 额外错误对象
+ * @returns {Promise}
  */
-export const to = <T = any>(promise: Promise<T>, errorExt?: Error): Promise<ToResponse<T>> => {
-  if (!promise) {
-    return Promise.resolve([null, undefined]);
-  }
+type PromiseResponse<T, E = AxiosError> = [err: E | null, data?: T]
+
+export const to = <T>(promise: Promise<T>, errorExt?: Error): Promise<PromiseResponse<T>> => {
+  if (!promise) return Promise.resolve([null, undefined])
 
   return promise
-    .then<ToResponse<T>>((res) => {
-      return [null, res];
-    })
-    .catch((err) => {
+    .then<PromiseResponse<T>>((data) => [null, data])
+    .catch<PromiseResponse<T>>((err) => {
       if (errorExt) {
-        return [Object.assign(err, errorExt), undefined];
+        return [Object.assign(err, errorExt), undefined]
       }
 
-      return [err, undefined];
-    });
-};
+      return [err, undefined]
+    })
+}

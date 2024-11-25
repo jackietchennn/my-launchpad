@@ -9,6 +9,7 @@ export interface ContractState {
     activatedChainConfig?: ChainConfiguration;
     activatedAccountAddress?: string;
     signer?: providers.JsonRpcSigner;
+    loading?: boolean;
 
     depositTokenContract?: C2NToken;
     earnedContract?: C2NToken;
@@ -20,6 +21,7 @@ const initialState: ContractState = {
     activatedChainConfig: undefined,
     activatedAccountAddress: undefined,
     signer: undefined,
+    loading: false,
 
     depositTokenContract: undefined,
     earnedContract: undefined,
@@ -42,11 +44,14 @@ const contractState = createSlice({
             state.signer = action.payload;
         },
         setContract: (state, action: PayloadAction<Pick<ContractState, 'depositTokenContract' | 'earnedContract' | 'stakingContract' | 'saleContract'>>) => {
-            Object.assign(state, action.payload)
+            Object.assign(state, action.payload);
+        },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
         }
     },
 });
 
-export const { setActivatedChainConfig, setActivatedAccountAddress, setSigner, setContract } = contractState.actions;
+export const { setActivatedChainConfig, setActivatedAccountAddress, setSigner, setContract, setLoading } = contractState.actions;
 
 export default contractState.reducer;
