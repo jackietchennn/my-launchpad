@@ -38,7 +38,6 @@ const contractState = createSlice({
         },
         setActivatedAccountAddress: (state, action: PayloadAction<string | undefined>) => {
             state.activatedAccountAddress = action.payload;
-            console.log('--- setActivatedAccountAddress', action);
         },
         setSigner: (state, action: PayloadAction<providers.JsonRpcSigner | undefined>) => {
             state.signer = action.payload;

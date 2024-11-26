@@ -84,7 +84,7 @@ export default function TransactionButton(props: TransactionButtonProps) {
 
     // normal
     return (
-        <div className={transactionButtonClass} onClick={waitForTransaction}>
+        <div className={transactionButtonClass} style={props.style} onClick={waitForTransaction}>
             {(props.disabled && props.disabledText) || props.children || "Connect Wallet"}
         </div>
     );

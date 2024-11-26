@@ -150,6 +150,10 @@ contract C2NToken is Context, IERC20 {
     function _spendAllowance(address owner, address spender, uint256 value) internal virtual {
         uint256 currentAllowance = _allowances[owner][spender];
 
+        // 打印日志
+        console.log("---address: ", owner, spender);
+        console.log("---allowance: ", value, currentAllowance);
+
         if (currentAllowance != type(uint256).max) {
             require(currentAllowance >= value, "ERC20: Insufficient allowance");
 

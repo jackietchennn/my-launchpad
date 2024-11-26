@@ -8,6 +8,7 @@ import { noop } from "antd/es/_util/warning";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import PoolBgPNG from "@/assets/images/pools_bg.png";
+import StakingForm from "@/containers/StakingForm/StakingForm";
 
 const WarningContent = ({ content }: { content: string }) => {
     return (
@@ -33,46 +34,58 @@ export default function Stake() {
 
     return (
         <main
-            className="container bg-auto bg-repeat bg-black"
+            className="min-h-screen bg-auto bg-repeat bg-black"
             style={{
-                backgroundImage: `url(${PoolBgPNG})`,
+                backgroundImage: `url(${PoolBgPNG.src})`,
                 backgroundPosition: "center top",
             }}
         >
-            <section className="introduction pt-[1px] text-white">
-                <h2 className="stake-title text-white mt-0 w-full text-[40px]">
-                    <Row justify="space-between">
+            <section className="introduction pt-[1px] text-white max-w-[1220px] m-auto">
+                <h2 className="stake-title mb-[20px]">
+                    <Row justify="space-between" align="middle">
                         <Col>
-                            <span>C2N Staking</span>
+                            <span className="text-white mt-0 w-full text-[40px]">C2N Staking</span>
                         </Col>
                         <Col>
-                            <span className="text-[16px] align-middle"></span>
-                            <QuestionCircleOutlined className="mr-[2.8px] align-middle text-[36px]" />
-                            See Tutorial: &nbsp;
-                            <span className="link text-[#ffb852] cursor-pointer hover:underline" onClick={noop}>
-                                {`${isDesktopOrLaptop ? "C2N Staking Tutorial" : "Tutorial"} `}
+                            <span className="text-[16px] align-middle flex items-center">
+                                <QuestionCircleOutlined className="mr-[2.8px] align-middle text-[36px]" />
+                                See Tutorial: &nbsp;
+                                <span className="link text-[#ffb852] cursor-pointer hover:underline" onClick={noop}>
+                                    {`${isDesktopOrLaptop ? "C2N Staking Tutorial" : "Tutorial"} `}
+                                </span>
                             </span>
                         </Col>
                     </Row>
                 </h2>
                 <div className="info mt-0 w-full p-[30px] rounded-[6px] bg-[#303030a0] text-[20px] leading-[28px] font-['PingfangSC, Roboto']">
-                    There is NO extra fee for {token.symbol} token staking, NO extra fee for unlocking. Members in C2N are attracted by our promising projects, not restricted by us charging a fee.
-                    However, IDO projects might require their own different lock-up period, see more details from the
+                    There is NO extra fee for {token.symbol} token staking, NO extra fee for unlocking. Members in C2N
+                    are attracted by our promising projects, not restricted by us charging a fee. However, IDO projects
+                    might require their own different lock-up period, see more details from the
                     <Link href="/pool">&nbsp;Projects Page</Link>.
                     <br />
                     <br />
                     <Row>
-                        <Col span={isDesktopOrLaptop ? 16 : 24}>
-                            Step1: Connect your wallet to stake {token.symbol} token, which is required to participate in IDOs.
+                        <Col span={isDesktopOrLaptop ? 16 : 24} className="!text-[20px]">
+                            Step1: Connect your wallet to stake {token.symbol} token, which is required to participate
+                            in IDOs.
                             <br />
                             Step2: Use {token.symbol} token to register for IDOs on C2N website, first come first serve.
                             <br />
-                            Step3: Always remember, the longer you hold our BRE tokens, the more projects which have potentials and values you could participate with us!
+                            Step3: Always remember, the longer you hold our BRE tokens, the more projects which have
+                            potentials and values you could participate with us!
                             <br />
                         </Col>
                         <Col span={isDesktopOrLaptop ? 8 : 24}>
-                            <Row justify="center" align="bottom" className="h-full" style={{ marginTop: isDesktopOrLaptop ? 0 : "14px" }}>
-                                <BasicButton className="wallet-button w-[287px] h-[54px]" onClick={() => triggerTokenAdd(token.chainId, token.address, token.symbol)}>
+                            <Row
+                                justify="center"
+                                align="bottom"
+                                className="h-full"
+                                style={{ marginTop: isDesktopOrLaptop ? 0 : "14px" }}
+                            >
+                                <BasicButton
+                                    className="wallet-button w-[287px] h-[54px] text-[20px]"
+                                    onClick={() => triggerTokenAdd(token.chainId, token.address, token.symbol)}
+                                >
                                     Add {token.symbol} To Wallet
                                 </BasicButton>
                             </Row>
@@ -89,19 +102,23 @@ export default function Stake() {
                             {WarningNetwork}
                             <Row justify="center" align="middle">
                                 <Col>
-                                    You are not currently connected to <b>{validChains[0].name}</b>. Please switch networks to use this application.
+                                    You are not currently connected to <b>{validChains[0].name}</b>. Please switch
+                                    networks to use this application.
                                 </Col>
                             </Row>
                             <Row justify="center" align="middle" className="mt-[14px]">
                                 <Col span={8}>
-                                    <BasicButton className="connect-button w-full" onClick={() => switchNetwork(CHAIN_ID)}>
+                                    <BasicButton
+                                        className="connect-button w-full"
+                                        onClick={() => switchNetwork(CHAIN_ID)}
+                                    >
                                         Switch Network
                                     </BasicButton>
                                 </Col>
                             </Row>
                         </div>
                     ) : (
-                        <h1>质押表单</h1>
+                        <StakingForm available></StakingForm>
                     )}
                 </div>
             </section>

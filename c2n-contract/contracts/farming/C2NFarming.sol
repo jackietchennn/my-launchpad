@@ -231,7 +231,12 @@ contract C2NFarming is Ownable {
         erc20Transfer(address(msg.sender), pendingAmount);
 
         pool.totalDeposits = pool.totalDeposits - _amount;
-        pool.lpToken.safeTransferFrom(address(this), msg.sender, pendingAmount);
+        // 不能使用 `safeTransferFrom`，该方法会校验allowance，会出问题
+        // `safeTransferFrom` 是第三方合约得到授权后，将资产从账户A转移到账户B的过程
+        // pool.lpToken.safeTransferFrom(address(msg.sender), pendingAmount);
+
+        // `safeTransfer` 是直接转移，不需要代理合约
+        pool.lpToken.safeTransfer(address(msg.sender), _amount);
         user.amount = user.amount - _amount;
         user.rewardDebt = user.amount * pool.accumulatedERC20PerShare / 1e36;
 
