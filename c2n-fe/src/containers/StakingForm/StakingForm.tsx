@@ -1,21 +1,20 @@
-import AppPopover from "@/components/elements/AppPopover";
-import TransactionButton from "@/components/elements/TransactionButton";
+import type { ReactNode } from "react";
+import type { CarouselRef } from "antd/es/carousel";
+import type { ComponentBaseProps } from "@/types/i-base";
+
+import { useRef } from "react";
+import { Motion, spring } from "react-motion";
+import { Carousel, Col, InputNumber, Row } from "antd";
+import { noop } from "antd/es/_util/warning";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+
+import { mergeClassName, seperateWithComma } from "@/utils/shared";
 import { usePageLoading } from "@/hooks/usePageLoading";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useStake } from "@/hooks/useStake";
 import { useWallet } from "@/hooks/useWallets";
-import { ComponentBaseProps } from "@/types/i-base";
-import { mergeClassName, seperateWithComma } from "@/utils/shared";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { Carousel, Col, InputNumber, Row, message } from "antd";
-import { noop } from "antd/es/_util/warning";
-import { CarouselRef } from "antd/es/carousel";
-import { formatEther, formatUnits, parseEther, parseUnits } from "ethers/lib/utils";
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Motion, spring } from "react-motion";
-import { C2NFarming } from "../../../typechain-types";
-import { to } from "@/utils";
-import { BigNumber } from "ethers";
+import { useStakeOperationInEther } from "@/hooks/useStakeOperation";
+import AppPopover from "@/components/elements/AppPopover";
+import TransactionButton from "@/components/elements/TransactionButton";
 
 export interface StakingFormProps extends ComponentBaseProps {
     poolId?: number;
@@ -99,7 +98,7 @@ const TokenOperationTitle = (props: { icon: string; title: string }) => {
 const TokenOperation = (props: {
     isDesktopOrLaptop: boolean;
     operationNum?: string;
-    balance?: BigNumber;
+    balance?: string;
     symbol?: string;
     available?: boolean;
     chainId?: number;
@@ -115,7 +114,7 @@ const TokenOperation = (props: {
             <Row gutter={[16, 16]} justify="space-between">
                 <Col span={isDesktopOrLaptop ? 12 : 24}>
                     <Row justify="space-between">
-                        <div className="balance">Balance: {balance ? `${formatEther(balance)} ${symbol}` : "-"}</div>
+                        <div className="balance">Balance: {balance ? `${balance} ${symbol}` : "-"}</div>
                         <div className="max text-[#55BC7E] cursor-pointer" onClick={() => onMaxClick()}>
                             MAX
                         </div>
@@ -127,7 +126,7 @@ const TokenOperation = (props: {
                     <div className="input w-full h-[54px] border-transparent rounded-[10px] relative bg-[#f4f4f4] text-[22px] leading-[54px]">
                         <InputNumber
                             value={operationNum}
-                            max={balance ? formatEther(balance) : "0"}
+                            max={balance ?? "0"}
                             controls={false}
                             variant="borderless"
                             step="0.0001"
@@ -199,118 +198,33 @@ const TokenStats = (props: {
 };
 
 const StakingForm = (props: StakingFormProps) => {
-    const { isDesktopOrLaptop } = useResponsive();
     const { PageLoader } = usePageLoading();
-    const { activatedChainConfig, activatedAccountAddress } = useWallet();
+    const { isDesktopOrLaptop } = useResponsive();
+    const { activatedChainConfig } = useWallet();
     const {
         poolId,
-        balance,
+        balanceInEther,
         depositSymbol,
-        depositAmount,
-        stakingAddress,
-        stakingContract,
+        depositedAmountInEther,
+        totalDepositedAmountInEther,
+        depositNumInEther,
+        withdrawNumInEther,
 
-        approve,
-        deposit,
-        withdraw,
-        syncContractInfo,
-    } = useStake();
+        setDepositNumInEther,
+        setWithdrawNumInEther,
+        triggerStakeButtonClick,
+        triggerWithdrawButtonClick,
+    } = useStakeOperationInEther();
 
     const carouselRef = useRef<CarouselRef>(null);
-    const [depositNum, setDepositNum] = useState<string>();
-    const [withdrawNum, setWithdrawNum] = useState<string>();
 
     // 以太币对USD汇率（一般由后端提供）
     const stakedTokenToUSD: number = 0;
-    // 当前用户质押数量
-    const depositedAmountInEther = depositAmount ? formatEther(depositAmount) : "0";
-    // 质押池信息
-    const [poolInfo, setPoolInfo] = useState<Awaited<ReturnType<C2NFarming["poolInfo"]>>>();
-    // 质押池总质押代币数量
-    const totalDeposited = useMemo(() => poolInfo?.totalDeposits ?? 1, [poolInfo]);
-    const syncPoolInfo = async (_poolId: BigNumber) => {
-        if (!stakingContract) return false;
-
-        const [poolErr, data] = await to(stakingContract.poolInfo(_poolId));
-        if (poolErr || !data) {
-            console.log("---poolErr ", poolErr, data);
-            return false;
-        }
-        setPoolInfo(data);
-        return true;
-    };
-
-    let poolInfoTimer: ReturnType<typeof setInterval>;
-    useEffect(() => {
-        if (!stakingContract) return;
-
-        const clearTimer = () => clearInterval(poolInfoTimer);
-        const syncInfo = () => {
-            syncPoolInfo(poolId);
-            syncContractInfo();
-        };
-
-        clearTimer();
-        syncInfo();
-        poolInfoTimer = setInterval(syncInfo, 20000);
-
-        return clearTimer;
-    }, [poolId, stakingContract, activatedAccountAddress, activatedChainConfig]);
-
-    const triggerDeposit = async () => {
-        // 判断输入值
-        if (!depositNum || depositNum === "0.0000") {
-            message.error(`Cannot stake 0 ${depositSymbol}!`);
-            return;
-        }
-        // 判断余额前，同步钱包信息
-        await syncContractInfo();
-        // 判断余额是否足够支付
-        if (parseUnits(depositNum).gt(balance)) {
-            message.error(`Not enough ${depositSymbol} to stake!`);
-            return;
-        }
-        // `approve` 授权质押合约 `depositNum` 代币数量
-        const [approveErr, approveSucceed] = await to(approve(stakingAddress, depositNum));
-        if (approveErr || approveSucceed === false) {
-            console.log('---approveErr ', approveErr, approveSucceed);
-            return 
-        }
-        // `deposit` 存储 `depositNum` 代币数量
-        const [depositErr, depositSucceed] = await to(deposit(poolId, depositNum))
-        if (depositErr || depositSucceed === false) {
-            console.log('---depositErr ', depositErr, depositSucceed);
-            return
-        }
-        console.log('---depositSucceed ', depositSucceed);
-        message.success(`Congratulations, you have successfully deposited ${depositNum} ${depositSymbol}`)
-        setDepositNum(undefined)
-        syncContractInfo()
-    };
-    const triggerWithdraw = async () => {
-        // 判断输入值
-        if (!withdrawNum || withdrawNum === '0.0000') {
-            message.error(`Invalid ${depositSymbol} to withdraw!`)
-            return
-        }
-
-        // `withdraw` 提取 `withdrawNum` 代币数量
-        const [withdrawErr, withdrawSucceed] = await to(withdraw(poolId, withdrawNum))
-        if (withdrawErr || withdrawSucceed === false) {
-            console.log('---withdrawErr ', withdrawErr, withdrawSucceed);
-            return
-        }
-        console.log('---withdrawSucceed ', withdrawSucceed);
-        message.success('Withdraw success!');
-        setWithdrawNum(undefined)
-        syncContractInfo()
-    };
 
     return (
         <PageLoader>
             <div className="staking-form w-full pt-[1px] bg-transparent">
                 {/* deposit form */}
-                
                 <section className="staking-token px-[45px] mt-[42px] whitespace-nowrap rounded-tl-[16px] rounded-tr-[16px]">
                     <Row gutter={[16, 16]} justify="space-between">
                         <Col
@@ -324,14 +238,14 @@ const StakingForm = (props: StakingFormProps) => {
                             ></TokenOperationTitle>
                             <TokenOperation
                                 isDesktopOrLaptop={isDesktopOrLaptop}
-                                operationNum={depositNum}
-                                balance={balance}
+                                operationNum={depositNumInEther}
+                                balance={balanceInEther}
                                 symbol={depositSymbol}
                                 available={props.available}
                                 chainId={activatedChainConfig?.chainId}
-                                onClick={triggerDeposit}
-                                onMaxClick={() => balance && setDepositNum(formatEther(balance))}
-                                onChange={(val: string) => setDepositNum(val ?? "")}
+                                onClick={() => triggerStakeButtonClick(poolId, depositNumInEther)}
+                                onMaxClick={() => balanceInEther && setDepositNumInEther(balanceInEther)}
+                                onChange={(val: string) => setDepositNumInEther(val ?? "")}
                             ></TokenOperation>
                             <Row>&nbsp;</Row>
 
@@ -342,14 +256,14 @@ const StakingForm = (props: StakingFormProps) => {
                             ></TokenOperationTitle>
                             <TokenOperation
                                 isDesktopOrLaptop={isDesktopOrLaptop}
-                                operationNum={withdrawNum}
-                                balance={depositAmount}
+                                operationNum={withdrawNumInEther}
+                                balance={depositedAmountInEther}
                                 symbol={depositSymbol}
                                 available={props.available}
                                 chainId={activatedChainConfig?.chainId}
-                                onClick={triggerWithdraw}
-                                onMaxClick={() => depositAmount && setWithdrawNum(formatEther(depositAmount))}
-                                onChange={(val: string) => setWithdrawNum(val ?? "")}
+                                onClick={() => triggerWithdrawButtonClick(poolId, withdrawNumInEther)}
+                                onMaxClick={() => depositedAmountInEther && setWithdrawNumInEther(depositedAmountInEther)}
+                                onChange={(val: string) => setWithdrawNumInEther(val ?? "")}
                             ></TokenOperation>
                         </Col>
                         <Col
@@ -407,7 +321,7 @@ const StakingForm = (props: StakingFormProps) => {
                             $
                             <Motion
                                 defaultStyle={{ x: 0 }}
-                                style={{ x: spring(parseFloat(formatEther(totalDeposited))) }}
+                                style={{ x: spring(parseFloat(totalDepositedAmountInEther)) }}
                             >
                                 {(value) => <>{seperateWithComma(value.x.toFixed(0))}</>}
                             </Motion>

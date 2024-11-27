@@ -2,14 +2,14 @@ import type { ChainConfiguration } from "@/types/i-chain";
 import type { ContractTransaction, ContractReceipt } from "ethers";
 
 import { useMemo, useState } from "react";
+import { BigNumber } from "ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 
 import { STAKING_POOL_ID, stakingPoolAddress } from "@/config";
-import { useWallet } from "./useWallets";
-import { useAppSelector } from "@/redux/store";
 import { to } from "@/utils";
-import { BigNumber } from "ethers";
+import { useAppSelector } from "@/redux/store";
+import { useWallet } from "./useWallets";
 import { C2NFarming, C2NToken } from "../../typechain-types";
-import { parseEther, parseUnits } from "ethers/lib/utils";
 
 const getSpecificTypeAddress = (
     addressType: "stakingAddress" | "depositTokenAddress" | "earnedTokenAddress",
@@ -19,39 +19,32 @@ const getSpecificTypeAddress = (
 };
 
 export const useStake = () => {
-    const stakingContract = useAppSelector((state) => state.contract.stakingContract);
-    const depositTokenContract = useAppSelector((state) => state.contract.depositTokenContract);
-    const earnedTokenContract = useAppSelector((state) => state.contract.earnedContract);
     const { activatedChainConfig, activatedAccountAddress } = useWallet();
 
-    // 获取当前用户信息：代币余额
-    // 获取当前用户存储代币信息：存储代币标识、存储代币兑换比、存储代币数量、存储代币合约地址
-    // 获取当前用户奖励代币信息：奖励代币标识、奖励代币数量、奖励代币合约地址
-    // 获取当前用户质押信息：授权质押合约代币数量、质押合约地址
-    // 获取质押总奖励（A池在过去一段时间中产生的总奖励）
-    // 获取质押奖励代币标识（可以理解为平台限定A池的质押代币B，而奖励的代币并不一定是代币B，可能是代币C、D，由平台规定）
-    // 获取当前用户质押相关的质押代币合约实例
-    // 获取当前用户质押相关的存储代币合约实例
-    // 获取当前用户质押相关的奖励代币合约实例
-
+    // 质押代币合约实例
+    const stakingContract = useAppSelector((state) => state.contract.stakingContract);
+    // 存储代币合约实例
+    const depositTokenContract = useAppSelector((state) => state.contract.depositTokenContract);
+    // 奖励代币合约实例
+    const earnedTokenContract = useAppSelector((state) => state.contract.earnedContract);
     // 质押池ID
     const [poolId, setPoolId] = useState<BigNumber>(BigNumber.from(STAKING_POOL_ID));
-    // 当前用户余额
-    const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0));
-    // 当前用户授权质押合约可消费的代币数量
-    const [allowance, setAllowance] = useState<bigint>();
+    // 质押池信息
+    const [poolInfo, setPoolInfo] = useState<Awaited<ReturnType<C2NFarming["poolInfo"]>>>();
 
     // 当前用户与存储代币合约关联信息
+    const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0));
     const [depositSymbol, setDepositSymbol] = useState<string>();
     const [depositDecimals, setDepositDecimals] = useState<bigint>();
     const [depositAmount, setDepositAmout] = useState<BigNumber>();
+    const [allowance, setAllowance] = useState<bigint>();
 
     // 当前用户与奖励代币合约关联信息
     const [earnedSymbol, setEarnedSymbol] = useState<string>();
     const [earnedAmount, setEarnedAmount] = useState<bigint>();
     const [totalPending, setTotalPending] = useState<bigint>();
 
-    // 质押、存储代币、奖励代币合约
+    // 质押、存储代币、奖励代币合约地址
     const stakingAddress = useMemo(
         () => getSpecificTypeAddress("stakingAddress", activatedChainConfig),
         [activatedChainConfig]
@@ -164,6 +157,16 @@ export const useStake = () => {
             syncDepositContractDeposited(poolId, activatedAccountAddress, stakingContract),
         ]);
     };
+    const syncPoolInfo = async (_poolId: BigNumber) => {
+        if (!stakingContract) return false;
+
+        const [poolErr, data] = await to(stakingContract.poolInfo(_poolId));
+        if (poolErr || !data) {
+            console.log("---poolErr ", poolErr, data);
+            return;
+        }
+        setPoolInfo(data);
+    };
 
     const approve = async (spender: string, amount: string) => {
         if (!depositTokenContract || !spender) return false;
@@ -221,6 +224,7 @@ export const useStake = () => {
 
     return {
         poolId,
+        poolInfo,
         balance,
         allowance,
         depositSymbol,
@@ -247,6 +251,7 @@ export const useStake = () => {
         setEarnedAmount,
         setTotalPending,
         syncContractInfo,
+        syncPoolInfo,
         approve,
         deposit,
         withdraw,
