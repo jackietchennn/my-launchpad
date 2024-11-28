@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { message } from "antd";
-import { BigNumber } from "ethers";
+import { BigNumberish } from "ethers";
 import { formatEther, parseUnits } from "ethers/lib/utils";
 
 import { to } from "@/utils";
@@ -28,13 +28,13 @@ export const useStakeOperationInEther = () => {
     } = useStake();
 
     // 当前用户余额
-    const balanceInEther = formatEther(balance);
+    const balanceInEther = balance ? formatEther(balance) : undefined;
     // 当前用户质押代币数量
-    const depositedAmountInEther = formatEther(depositAmount ?? 0);
+    const depositedAmountInEther = depositAmount ? formatEther(depositAmount) : undefined;
     // 当前用户奖励代币数量
     const earnedAmountInEther = earnedAmount ? formatEther(earnedAmount) : undefined;
     // 所有用户质押总代币数量
-    const totalDepositedAmountInEther = formatEther(poolInfo?.totalDeposits ?? 0);
+    const totalDepositedAmountInEther = poolInfo?.totalDeposits ? formatEther(poolInfo.totalDeposits) : undefined;
 
     // 质押数量
     const [depositNumInEther, setDepositNumInEther] = useState<string>();
@@ -59,9 +59,9 @@ export const useStakeOperationInEther = () => {
 
     // 质押按钮点击
     const triggerStakeButtonClick = useCallback(
-        async (_poolId: BigNumber, _amount?: string) => {
+        async (_poolId: BigNumberish, _amount?: string) => {
             // 判断输入值
-            if (!_amount || _amount === "0.0000") {
+            if (!_amount || _amount === "0.0000" || !balance) {
                 message.error(`Cannot stake 0 ${depositSymbol}!`);
                 return;
             }
@@ -97,7 +97,7 @@ export const useStakeOperationInEther = () => {
     );
     // 取款按钮点击
     const triggerWithdrawButtonClick = useCallback(
-        async (_poolId: BigNumber, _amount?: string) => {
+        async (_poolId: BigNumberish, _amount?: string) => {
             // 判断输入值
             if (!_amount || _amount === "0.0000") {
                 message.error(`Invalid ${depositSymbol} to withdraw!`);

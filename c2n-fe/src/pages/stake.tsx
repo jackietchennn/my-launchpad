@@ -47,7 +47,7 @@ export default function Stake() {
                             <span className="text-white mt-0 w-full text-[40px]">C2N Staking</span>
                         </Col>
                         <Col>
-                            <span className="text-[16px] align-middle flex items-center">
+                            <span className="text-[16px] text-white align-middle flex items-center">
                                 <QuestionCircleOutlined className="mr-[2.8px] align-middle text-[36px]" />
                                 See Tutorial: &nbsp;
                                 <span className="link text-[#ffb852] cursor-pointer hover:underline" onClick={noop}>

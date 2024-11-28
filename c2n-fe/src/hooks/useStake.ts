@@ -1,5 +1,5 @@
 import type { ChainConfiguration } from "@/types/i-chain";
-import type { ContractTransaction, ContractReceipt } from "ethers";
+import type { ContractTransaction, ContractReceipt, BigNumberish } from "ethers";
 
 import { useMemo, useState } from "react";
 import { BigNumber } from "ethers";
@@ -33,7 +33,7 @@ export const useStake = () => {
     const [poolInfo, setPoolInfo] = useState<Awaited<ReturnType<C2NFarming["poolInfo"]>>>();
 
     // 当前用户与存储代币合约关联信息
-    const [balance, setBalance] = useState<BigNumber>(BigNumber.from(0));
+    const [balance, setBalance] = useState<BigNumber>();
     const [depositSymbol, setDepositSymbol] = useState<string>();
     const [depositDecimals, setDepositDecimals] = useState<bigint>();
     const [depositAmount, setDepositAmout] = useState<BigNumber>();
@@ -183,7 +183,7 @@ export const useStake = () => {
         await transaction.wait();
         syncDepositContractAllowance(activatedAccountAddress, spender, depositTokenContract);
     };
-    const deposit = async (_poolId: BigNumber, _amount: string) => {
+    const deposit = async (_poolId: BigNumberish, _amount: string) => {
         if (!stakingContract) return false;
 
         const [depositErr, transaction] = await to<ContractTransaction>(
@@ -202,7 +202,7 @@ export const useStake = () => {
 
         return contractReceipt;
     };
-    const withdraw = async (_poolId: BigNumber, _amount: string) => {
+    const withdraw = async (_poolId: BigNumberish, _amount: string) => {
         if (!stakingContract) return false;
 
         const [withdrawErr, transaction] = await to<ContractTransaction>(

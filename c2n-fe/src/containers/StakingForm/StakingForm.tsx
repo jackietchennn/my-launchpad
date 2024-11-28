@@ -95,24 +95,35 @@ const TokenOperationTitle = (props: { icon: string; title: string }) => {
     );
 };
 
-const TokenOperation = (props: {
+export const TokenOperation = (props: {
     isDesktopOrLaptop: boolean;
     operationNum?: string;
     balance?: string;
     symbol?: string;
     available?: boolean;
     chainId?: number;
+    block?: boolean;
     onClick(): void;
     onMaxClick(): void;
     onChange(value: string | null): void;
 }) => {
-    const { isDesktopOrLaptop, operationNum, balance, symbol, available, chainId, onClick, onMaxClick, onChange } =
-        props;
+    const {
+        isDesktopOrLaptop,
+        operationNum,
+        balance,
+        symbol,
+        available,
+        chainId,
+        block,
+        onClick,
+        onMaxClick,
+        onChange,
+    } = props;
 
     return (
         <>
             <Row gutter={[16, 16]} justify="space-between">
-                <Col span={isDesktopOrLaptop ? 12 : 24}>
+                <Col span={block ? 24 : isDesktopOrLaptop ? 12 : 24}>
                     <Row justify="space-between">
                         <div className="balance">Balance: {balance ? `${balance} ${symbol}` : "-"}</div>
                         <div className="max text-[#55BC7E] cursor-pointer" onClick={() => onMaxClick()}>
@@ -122,7 +133,7 @@ const TokenOperation = (props: {
                 </Col>
             </Row>
             <Row gutter={[16, 16]} justify="space-between">
-                <Col span={isDesktopOrLaptop ? 12 : 24}>
+                <Col span={block ? 24 : isDesktopOrLaptop ? 12 : 24}>
                     <div className="input w-full h-[54px] border-transparent rounded-[10px] relative bg-[#f4f4f4] text-[22px] leading-[54px]">
                         <InputNumber
                             value={operationNum}
@@ -139,7 +150,7 @@ const TokenOperation = (props: {
                         </div>
                     </div>
                 </Col>
-                <Col span={isDesktopOrLaptop ? 12 : 24}>
+                <Col span={block ? 24 : isDesktopOrLaptop ? 12 : 24}>
                     {available ? (
                         <TransactionButton
                             requiredChainId={chainId}
@@ -262,7 +273,9 @@ const StakingForm = (props: StakingFormProps) => {
                                 available={props.available}
                                 chainId={activatedChainConfig?.chainId}
                                 onClick={() => triggerWithdrawButtonClick(poolId, withdrawNumInEther)}
-                                onMaxClick={() => depositedAmountInEther && setWithdrawNumInEther(depositedAmountInEther)}
+                                onMaxClick={() =>
+                                    depositedAmountInEther && setWithdrawNumInEther(depositedAmountInEther)
+                                }
                                 onChange={(val: string) => setWithdrawNumInEther(val ?? "")}
                             ></TokenOperation>
                         </Col>
@@ -305,10 +318,13 @@ const StakingForm = (props: StakingFormProps) => {
                             isDesktopOrLaptop={isDesktopOrLaptop}
                             title={`My Staked ${depositSymbol}`}
                             subValue={`~$${seperateWithComma(
-                                (parseFloat(depositedAmountInEther) * stakedTokenToUSD).toFixed(2)
+                                (parseFloat(depositedAmountInEther ?? "0") * stakedTokenToUSD).toFixed(2)
                             )}`}
                         >
-                            <Motion defaultStyle={{ x: 0 }} style={{ x: spring(parseFloat(depositedAmountInEther)) }}>
+                            <Motion
+                                defaultStyle={{ x: 0 }}
+                                style={{ x: spring(parseFloat(depositedAmountInEther ?? "0")) }}
+                            >
                                 {(value) => (
                                     <>
                                         {seperateWithComma(value.x.toFixed(2))} {depositSymbol}
@@ -321,7 +337,7 @@ const StakingForm = (props: StakingFormProps) => {
                             $
                             <Motion
                                 defaultStyle={{ x: 0 }}
-                                style={{ x: spring(parseFloat(totalDepositedAmountInEther)) }}
+                                style={{ x: spring(parseFloat(totalDepositedAmountInEther ?? "0")) }}
                             >
                                 {(value) => <>{seperateWithComma(value.x.toFixed(0))}</>}
                             </Motion>

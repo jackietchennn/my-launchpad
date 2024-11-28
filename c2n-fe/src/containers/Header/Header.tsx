@@ -13,7 +13,6 @@ import NetworkButton from "@/components/elements/NetworkButton";
 // menu
 const menus = [
   { title: "Home", path: "/" },
-  { title: "Farm", path: "/farming" },
   { title: "Projects", path: "/project" },
   { title: "Stake", path: "/stake" },
 ];
